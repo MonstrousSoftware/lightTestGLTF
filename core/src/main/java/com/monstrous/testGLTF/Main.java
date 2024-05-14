@@ -2,18 +2,17 @@ package com.monstrous.testGLTF;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.ScreenUtils;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
@@ -25,12 +24,8 @@ import net.mgsx.gltf.scene3d.scene.Scene;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import net.mgsx.gltf.scene3d.scene.SceneManager;
 import net.mgsx.gltf.scene3d.scene.SceneSkybox;
-import net.mgsx.gltf.scene3d.shaders.PBRDepthShaderProvider;
-import net.mgsx.gltf.scene3d.shaders.PBRShaderConfig;
-import net.mgsx.gltf.scene3d.shaders.PBRShaderProvider;
 import net.mgsx.gltf.scene3d.utils.EnvironmentUtil;
 import net.mgsx.gltf.scene3d.utils.IBLBuilder;
-import net.mgsx.gltf.scene3d.lights.DirectionalShadowLight;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -47,6 +42,8 @@ public class Main extends ApplicationAdapter {
     private float camDistance;
     private SceneSkybox skybox;
     private DirectionalLightEx light;
+    private Scene tree;
+    private Scene groundPlane;
 
     @Override
     public void create() {
@@ -58,11 +55,11 @@ public class Main extends ApplicationAdapter {
 
         // create scene
         sceneAsset = new GLTFLoader().load(Gdx.files.internal("spookytree.gltf"));
-        scene = new Scene(sceneAsset.scene, "spookyTree");
-        sceneManager.addScene(scene);
+        tree = new Scene(sceneAsset.scene, "spookyTree");
+        sceneManager.addScene(tree);
         //scene = new Scene(sceneAsset.scene, "groundPlane");
-        scene = makeGroundPlane();
-        sceneManager.addScene(scene);
+        groundPlane = makeGroundPlane();
+        sceneManager.addScene(groundPlane);
 
         // setup camera (The BoomBox model is very small so you may need to adapt camera settings for your scene)
         camera = new PerspectiveCamera(60f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -133,7 +130,7 @@ public class Main extends ApplicationAdapter {
         camera.update();
 
         // render
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        ScreenUtils.clear(Color.SKY, true);
         sceneManager.update(deltaTime);
         sceneManager.render();
     }
